@@ -16,9 +16,8 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Building2, Image as ImageIcon, Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 
-const API_BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-  ? "http://localhost:4000/api"
-  : "/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/api";
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 const LOGO_PLACEMENT_OPTIONS = [
   { value: "none", label: "Do not place logo" },
