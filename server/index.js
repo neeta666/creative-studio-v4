@@ -1291,7 +1291,7 @@ const generateImageWithAzure = async ({ prompt, size = '1024x1024' }) => {
       return { response, data };
     } catch (error) {
       if (error?.name === 'AbortError') {
-        throw new Error('Azure image generation timed out after 45 seconds.');
+        throw new Error(`Azure image generation timed out after ${requestTimeoutMs / 1000} seconds.`);
       }
 
       throw error;
