@@ -352,14 +352,7 @@ export default function History() {
                 {/* Expanded variants */}
                 {selectedEntry?.id === entry.id && entry.variants && (
                   <div className="mt-3 pt-3 border-t border-border space-y-2">
-                    {(entry.company_persona_name || entry.company_tagline || entry.company_logo_url || entry.company_persona_analysis) && (
-                      <div className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-                        {entry.company_persona_name && <p className="font-medium text-foreground">Persona: {entry.company_persona_name}</p>}
-                        {entry.company_tagline && <p className="mt-1">Tagline: {entry.company_tagline}</p>}
-                        {entry.company_logo_url && <p className="mt-1">Logo: {entry.company_logo_url}</p>}
-                        {entry.company_persona_analysis && <p className="mt-1">{entry.company_persona_analysis}</p>}
-                      </div>
-                    )}
+                    
                     {entry.variants.map((v, i) => (
                       <div
                         key={i}

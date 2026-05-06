@@ -1884,9 +1884,9 @@ app.get('/api/history', authRequired, async (req, res) => {
   const limit = Math.min(Number(req.query.limit || 10), 50);
   const before = String(req.query.before || '').trim();
   const userId = req.user.id || req.user._id.toString();
-  const rows = await store.listHistoryPage({ user_id: userId }, 'updated_date', limit, before || undefined);
+  const rows = await store.listHistoryPage({ user_id: userId }, 'created_date', limit, before || undefined);
   const serializedRows = rows.map(serializeHistoryListRow);
-  const nextCursor = rows.length === limit ? rows[rows.length - 1]?.updated_date || rows[rows.length - 1]?.created_date || null : null;
+  const nextCursor = rows.length === limit ? rows[rows.length - 1]?.created_date || null : null;
 
   res.json({ items: serializedRows, nextCursor });
 });
