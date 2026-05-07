@@ -423,7 +423,12 @@ const downloadAzureVideoContent = async ({ videoId, variant = azureVideoDownload
   return Buffer.from(arrayBuffer);
 };
 
-const saveAzureVideoAsset = async ({ videoId, variant = azureVideoDownloadVariant }) => {
+const saveAzureVideoAsset = async ({
+  videoId,
+  variant = azureVideoDownloadVariant,
+  logoUrl = '',
+  logoPlacement = 'none',
+}) => {
   const buffer = await downloadAzureVideoContent({ videoId, variant });
 
   const uploadResult = await new Promise((resolve, reject) => {
@@ -443,22 +448,53 @@ const saveAzureVideoAsset = async ({ videoId, variant = azureVideoDownloadVarian
     stream.end(buffer);
   });
 
-  return uploadResult.secure_url;
+  if (logoUrl && logoPlacement && logoPlacement !== 'none') {
+  const gravity = cloudinaryGravityMap[logoPlacement] || 'south_east';
+  const logoPublicId = getCloudinaryPublicIdFromUrl(logoUrl);
+
+  if (logoPublicId) {
+    return cloudinary.url(uploadResult.public_id, {
+      resource_type: 'video',
+      secure: true,
+      transformation: [
+        {
+          overlay: logoPublicId,
+          width: 130,
+          opacity: 90,
+          gravity,
+          x: 32,
+          y: 32,
+        },
+      ],
+    });
+  }
+}
+
+return uploadResult.secure_url;
 };
 
-const normalizeAzureVideoResult = async ({ payload, statusUrl = null }) => {
+const normalizeAzureVideoResult = async ({
+  payload,
+  statusUrl = null,
+  logoUrl = '',
+  logoPlacement = 'none',
+}) => {
   const videoUrl = extractAzureVideoUrl(payload);
   const normalizedStatus = normalizeAzureVideoStatus(payload);
   const videoId = extractAzureVideoId(payload);
   let resolvedVideoUrl = videoUrl;
 
   if (!resolvedVideoUrl && normalizedStatus === 'completed' && videoId) {
-    try {
-      resolvedVideoUrl = await saveAzureVideoAsset({ videoId });
-    } catch (error) {
-      console.warn('Azure video download pending or unavailable:', error.message || error);
-    }
+  try {
+    resolvedVideoUrl = await saveAzureVideoAsset({
+      videoId,
+      logoUrl,
+      logoPlacement,
+    });
+  } catch (error) {
+    console.warn('Azure video download pending or unavailable:', error.message || error);
   }
+}
 
   return {
     video_url: resolvedVideoUrl,
@@ -469,7 +505,12 @@ const normalizeAzureVideoResult = async ({ payload, statusUrl = null }) => {
   };
 };
 
-const generateVideoWithAzure = async ({ prompt, durationSeconds = azureVideoDurationSeconds }) => {
+const generateVideoWithAzure = async ({
+  prompt,
+  durationSeconds = azureVideoDurationSeconds,
+  logoUrl = '',
+  logoPlacement = 'none',
+}) => {
   if (!azureVideoApiKey || !azureVideoEndpoint) {
     throw new Error('Azure video generation is not configured. Set AZURE_OPENAI_VIDEO_API_KEY and AZURE_OPENAI_VIDEO_ENDPOINT in the server environment.');
   }
@@ -514,7 +555,12 @@ const generateVideoWithAzure = async ({ prompt, durationSeconds = azureVideoDura
   }
 
   const initialStatusUrl = response.headers.get('operation-location') || response.headers.get('Operation-Location') || buildAzureVideoStatusUrl(azureVideoEndpoint, data);
-  let normalized = await normalizeAzureVideoResult({ payload: data, statusUrl: initialStatusUrl });
+  let normalized = await normalizeAzureVideoResult({
+    payload: data,
+    statusUrl: initialStatusUrl,
+    logoUrl,
+    logoPlacement,
+  });
 
   if (normalized.video_url || normalized.status === 'failed' || !normalized.status_url) {
     return normalized;
@@ -524,7 +570,12 @@ const generateVideoWithAzure = async ({ prompt, durationSeconds = azureVideoDura
   while (Date.now() - startedAt < azureVideoPollTimeoutMs) {
     await sleep(azureVideoPollIntervalMs);
     const statusPayload = await fetchAzureVideoStatus({ statusUrl: normalized.status_url });
-    normalized = await normalizeAzureVideoResult({ payload: statusPayload, statusUrl: normalized.status_url });
+    normalized = await normalizeAzureVideoResult({
+      payload: statusPayload,
+      statusUrl: normalized.status_url,
+      logoUrl,
+      logoPlacement,
+    });
 
     if (normalized.video_url || normalized.status === 'completed' || normalized.status === 'failed') {
       return normalized;
@@ -1719,7 +1770,16 @@ app.post('/api/generate-video', authRequired, async (req, res) => {
       variantContent,
     });
 
-    const video = await generateVideoWithAzure({ prompt });
+    const resolvedLogoPlacement =
+      logoPlacement === 'persona-default'
+        ? (companyPersona?.logo_placement || 'none')
+        : (logoPlacement || companyPersona?.logo_placement || 'none');
+
+    const video = await generateVideoWithAzure({
+      prompt,
+      logoUrl: companyPersona?.logoUrl || companyPersona?.logo_url || '',
+      logoPlacement: resolvedLogoPlacement,
+    });
     res.json({ prompt, ...video });
   } catch (error) {
     console.error('Video generation failed:', error?.message || error);
