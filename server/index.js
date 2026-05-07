@@ -907,7 +907,7 @@ const updateImageJob = (jobId, updates) => {
   return nextJob;
 };
 
-const startImageGenerationJob = ({ prompt, size }) => {
+  const startImageGenerationJob = ({ prompt, size, logoUrl = '', logoPlacement = 'none' }) => {
   const jobId = createImageJobId();
   const startedAt = Date.now();
   const estimatedTotalMs = getAverageImageGenerationDurationMs();
@@ -921,6 +921,8 @@ const startImageGenerationJob = ({ prompt, size }) => {
     size,
     startedAt,
     estimatedTotalMs,
+    logoUrl,
+    logoPlacement,
     completedAt: null,
     error: null,
     result: null,
@@ -942,7 +944,12 @@ const startImageGenerationJob = ({ prompt, size }) => {
         });
       }, 1500);
 
-      const image = await generateImageWithAzure({ prompt, size });
+      const image = await generateImageWithAzure({
+        prompt,
+        size,
+        logoUrl,
+        logoPlacement,
+      });
       clearTimeout(phaseTimer);
       const completedAt = Date.now();
       pushImageGenerationDuration(completedAt - startedAt);
@@ -967,14 +974,36 @@ const startImageGenerationJob = ({ prompt, size }) => {
   return jobId;
 };
 
-const generateImageWithAzure = async ({ prompt, size = '1024x1024' }) => {
+const getCloudinaryPublicIdFromUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    const parts = parsedUrl.pathname.split('/upload/');
+    if (parts.length < 2) return '';
+
+    let publicPath = parts[1];
+
+    publicPath = publicPath.replace(/^v\d+\//, '');
+    publicPath = publicPath.replace(/\.[^/.]+$/, '');
+
+    return publicPath.replace(/\//g, ':');
+  } catch {
+    return '';
+  }
+};
+
+const generateImageWithAzure = async ({
+  prompt,
+  size = '1024x1024',
+  logoUrl = '',
+  logoPlacement = 'none',
+}) => {
   if (!azureImageApiKey || !azureImageEndpoint) {
     throw new Error('Azure image generation is not configured on the server.');
   }
 
   const baseEndpoint = azureImageEndpoint.replace(/\/$/, '');
   const requestUrl = `${baseEndpoint}/openai/deployments/${azureImageDeployment}/images/generations?api-version=${azureImageApiVersion}`;
-  const requestTimeoutMs = 180000;
+  const requestTimeoutMs = 240000;
 
   const requestImage = async (body) => {
     const controller = new AbortController();
@@ -1050,9 +1079,10 @@ const generateImageWithAzure = async ({ prompt, size = '1024x1024' }) => {
   }
 
   let finalImageUrl = imageUrl;
+  let uploadResult = null;
 
 if (!finalImageUrl && b64Json) {
-  const uploadResult = await cloudinary.uploader.upload(
+  uploadResult = await cloudinary.uploader.upload(
     `data:image/png;base64,${b64Json}`,
     {
       folder: `${process.env.CLOUDINARY_FOLDER || 'creative-studio-os'}/images`,
@@ -1061,6 +1091,30 @@ if (!finalImageUrl && b64Json) {
   );
 
   finalImageUrl = uploadResult.secure_url;
+}
+
+if (
+  finalImageUrl &&
+  logoUrl &&
+  logoPlacement &&
+  logoPlacement !== 'none'
+) {
+  const gravity =
+    cloudinaryGravityMap[logoPlacement] || 'south_east';
+
+  finalImageUrl = cloudinary.url(uploadResult.public_id, {
+    secure: true,
+    transformation: [
+      {
+        overlay: getCloudinaryPublicIdFromUrl(logoUrl),
+        width: 180,
+        opacity: 100,
+        gravity,
+        x: 24,
+        y: 24,
+      },
+    ],
+  });
 }
 
 return {
@@ -1547,6 +1601,18 @@ app.post('/api/company-personas/:id/learn', authRequired, async (req, res) => {
   res.json(sanitizeCompanyPersona(updated));
 });
 
+const cloudinaryGravityMap = {
+  'top-left': 'north_west',
+  'top-center': 'north',
+  'top-right': 'north_east',
+  'center-left': 'west',
+  'center': 'center',
+  'center-right': 'east',
+  'bottom-left': 'south_west',
+  'bottom-center': 'south',
+  'bottom-right': 'south_east',
+};
+
 app.post('/api/generate-image', authRequired, async (req, res) => {
   try {
     const platform = req.body?.platform || null;
@@ -1582,7 +1648,17 @@ app.post('/api/generate-image', authRequired, async (req, res) => {
     const size = selectAzureImageSize({ platform, contentType });
 
     if (req.body?.async !== false) {
-      const jobId = startImageGenerationJob({ prompt, size });
+      const resolvedLogoPlacement =
+        logoPlacement === 'persona-default'
+          ? (companyPersona?.logo_placement || 'none')
+          : (logoPlacement || companyPersona?.logo_placement || 'none');
+      
+      const jobId = startImageGenerationJob({
+        prompt,
+        size,
+        logoUrl: companyPersona?.logoUrl || companyPersona?.logo_url || '',
+        logoPlacement: resolvedLogoPlacement,
+      });
       return res.status(202).json({
         jobId,
         prompt,

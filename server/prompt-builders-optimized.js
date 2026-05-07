@@ -251,10 +251,9 @@ export const buildImagePrompt = ({
     // Merged the URL, placement, and fidelity requirement into one line.
     // Was previously split across 3 separate array entries (~230 chars → 90).
     hasLogo
-      ? `Logo: ${persona.logo_url} — place at ${requestedLogoPlacement}${
-          preserveOriginalLogo ? ', exact fidelity, do not alter' : ''
-        }.`
+      ? `Do not generate, recreate, imitate, redraw, stylize, or display ANY company logo, watermark, brand mark, brand initials, company text, or branding anywhere in the image. Do not invent or hallucinate logos or company names. Leave the ${requestedLogoPlacement} area clean, empty, and visually unobstructed so the exact uploaded logo can be overlaid later during post-processing.`
       : null,
+      
 
     // ── Content signals ───────────────────────────────────────────────────
     topic ? `Topic: ${topic}.` : null,
@@ -382,9 +381,7 @@ export const buildVideoPrompt = ({
 
     // ── Logo ──────────────────────────────────────────────────────────────
     hasLogo
-      ? `Logo: ${persona.logo_url} — place at ${requestedLogoPlacement}${
-          preserveOriginalLogo ? ', exact fidelity, do not alter' : ''
-        }.`
+      ? `Do not generate, recreate, imitate, redraw, stylize, or display ANY company logo, watermark, brand mark, brand initials, company text, or branding anywhere in the image. Do not invent or hallucinate logos or company names. Leave the ${requestedLogoPlacement} area clean, empty, and visually unobstructed so the exact uploaded logo can be overlaid later during post-processing.`
       : null,
 
     // ── Content signals ───────────────────────────────────────────────────
