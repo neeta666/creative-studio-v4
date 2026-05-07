@@ -1686,7 +1686,9 @@ app.post('/api/generate-image', authRequired, async (req, res) => {
       topic,
       companyPersona: companyPersona ? {
         ...companyPersona,
-        logoPlacementOverride: logoPlacement === 'persona-default' ? (companyPersona.logo_placement || 'none') : (logoPlacement || companyPersona.logo_placement || 'none'),
+        logoPlacementOverride: logoPlacement === 'persona-default'
+          ? (companyPersona.logo_placement || companyPersona.logoPlacement || 'none')
+          : (logoPlacement || companyPersona.logo_placement || companyPersona.logoPlacement || 'none'),
         useOriginalLogo,
       } : null,
       contentType,
@@ -1701,8 +1703,8 @@ app.post('/api/generate-image', authRequired, async (req, res) => {
     if (req.body?.async !== false) {
       const resolvedLogoPlacement =
         logoPlacement === 'persona-default'
-          ? (companyPersona?.logo_placement || 'none')
-          : (logoPlacement || companyPersona?.logo_placement || 'none');
+          ? (companyPersona?.logo_placement || companyPersona?.logoPlacement || 'none')
+          : (logoPlacement || companyPersona?.logo_placement || companyPersona?.logoPlacement || 'none');
       
       const jobId = startImageGenerationJob({
         prompt,
@@ -1760,7 +1762,9 @@ app.post('/api/generate-video', authRequired, async (req, res) => {
       topic,
       companyPersona: companyPersona ? {
         ...companyPersona,
-        logoPlacementOverride: logoPlacement === 'persona-default' ? (companyPersona.logo_placement || 'none') : (logoPlacement || companyPersona.logo_placement || 'none'),
+        logoPlacementOverride: logoPlacement === 'persona-default'
+          ? (companyPersona.logo_placement || companyPersona.logoPlacement || 'none')
+          : (logoPlacement || companyPersona.logo_placement || companyPersona.logoPlacement || 'none'),
         useOriginalLogo,
       } : null,
       contentType,
@@ -1772,8 +1776,8 @@ app.post('/api/generate-video', authRequired, async (req, res) => {
 
     const resolvedLogoPlacement =
       logoPlacement === 'persona-default'
-        ? (companyPersona?.logo_placement || 'none')
-        : (logoPlacement || companyPersona?.logo_placement || 'none');
+        ? (companyPersona?.logo_placement || companyPersona?.logoPlacement || 'none')
+        : (logoPlacement || companyPersona?.logo_placement || companyPersona?.logoPlacement || 'none');
 
     const video = await generateVideoWithAzure({
       prompt,
