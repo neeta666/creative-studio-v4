@@ -1042,6 +1042,22 @@ const getCloudinaryPublicIdFromUrl = (url) => {
   }
 };
 
+const fetchImageBufferFromUrl = async (url) => {
+  if (!url) {
+    return null;
+  }
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from URL: ${response.status}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+
+  return Buffer.from(arrayBuffer);
+};
+
 const generateImageWithAzure = async ({
   prompt,
   size = '1024x1024',
@@ -1132,6 +1148,7 @@ const generateImageWithAzure = async ({
   let finalImageUrl = imageUrl;
   let uploadResult = null;
 
+
 if (!finalImageUrl && b64Json) {
   uploadResult = await cloudinary.uploader.upload(
     `data:image/png;base64,${b64Json}`,
@@ -1142,6 +1159,79 @@ if (!finalImageUrl && b64Json) {
   );
 
   finalImageUrl = uploadResult.secure_url;
+}
+
+const enableAzureImageEditMode = process.env.ENABLE_AZURE_IMAGE_EDIT_MODE === 'true';
+
+  if (
+  enableAzureImageEditMode &&  
+  finalImageUrl &&
+  logoUrl &&
+  logoPlacement &&
+  logoPlacement !== 'none'
+  ) {
+  try {
+    console.log('[IMAGE EDIT] Starting edit mode...');
+    const baseImageBuffer = await fetchImageBufferFromUrl(finalImageUrl);
+    const logoBuffer = await fetchImageBufferFromUrl(logoUrl);
+
+    const formData = new FormData();
+
+    formData.append(
+      'image[]',
+      new Blob([baseImageBuffer], { type: 'image/png' }),
+      'base.png'
+    );
+
+    formData.append(
+      'image[]',
+      new Blob([logoBuffer], { type: 'image/jpeg' }),
+      'logo.jpg'
+    );
+
+    formData.append(
+      'prompt',
+      `Replace any existing logos or branding in the image with the uploaded logo. Place the uploaded logo in the ${logoPlacement.replace('-', ' ')} area. Preserve the overall poster layout, typography, colors, people, and composition exactly as they are. Do not redesign the logo.`
+    );
+
+    formData.append('model', azureImageDeployment);
+    formData.append('size', size);
+
+    const editResponse = await fetch(
+      `${baseEndpoint}/openai/v1/images/edits?api-version=preview`,
+      {
+        method: 'POST',
+        headers: {
+          'api-key': azureImageApiKey,
+        },
+        body: formData,
+      }
+    );
+
+    const editData = await editResponse.json();
+    console.log('[IMAGE EDIT]', {
+      ok: editResponse.ok,
+      status: editResponse.status,
+      error: editData?.error?.message,
+      hasOutput: Boolean(editData?.data?.[0]?.b64_json),
+    });
+
+    const editedImage = editData?.data?.[0];
+
+    if (editedImage?.b64_json) {
+      uploadResult = await cloudinary.uploader.upload(
+        `data:image/png;base64,${editedImage.b64_json}`,
+        {
+          folder: `${process.env.CLOUDINARY_FOLDER || 'creative-studio-os'}/images`,
+          resource_type: 'image',
+        }
+      );
+
+      finalImageUrl = uploadResult.secure_url;
+    }
+  } catch (error) {
+    console.error('[IMAGE EDIT FAILED]', error);
+  }
 }
 
 if (

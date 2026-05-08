@@ -31,3 +31,6 @@ dist-ssr
 
 .env
 .vite
+
+test-assets/
+test-video-reference.js
