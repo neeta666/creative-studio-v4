@@ -1195,7 +1195,9 @@ const enableAzureImageEditMode = process.env.ENABLE_AZURE_IMAGE_EDIT_MODE === 't
     );
 
     formData.append('model', azureImageDeployment);
+    console.log('[IMAGE EDIT SIZE]', size);
     formData.append('size', size);
+    formData.append('quality', 'medium');
 
     const editResponse = await fetch(
       `${baseEndpoint}/openai/v1/images/edits?api-version=preview`,
@@ -1228,6 +1230,12 @@ const enableAzureImageEditMode = process.env.ENABLE_AZURE_IMAGE_EDIT_MODE === 't
       );
 
       finalImageUrl = uploadResult.secure_url;
+    }
+    if (editedImage?.b64_json) {
+      return {
+        image_url: finalImageUrl,
+        revised_prompt: data?.data?.[0]?.revised_prompt || prompt,
+      };
     }
   } catch (error) {
     console.error('[IMAGE EDIT FAILED]', error);
