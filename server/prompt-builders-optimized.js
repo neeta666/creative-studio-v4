@@ -250,9 +250,11 @@ export const buildImagePrompt = ({
     // ── Logo ──────────────────────────────────────────────────────────────
     // Merged the URL, placement, and fidelity requirement into one line.
     // Was previously split across 3 separate array entries (~230 chars → 90).
-    hasLogo
-      ? `Do not generate, recreate, imitate, redraw, stylize, or display ANY company logo, watermark, brand mark, brand initials, company text, or branding anywhere in the image. Do not invent or hallucinate logos or company names. Leave the ${requestedLogoPlacement} area clean, empty, and visually unobstructed so the exact uploaded logo can be overlaid later during post-processing.`
-      : null,
+    requestedLogoPlacement === 'none'
+      ? 'Do not generate, recreate, imitate, redraw, stylize, or display ANY company logo, watermark, brand mark, brand initials, company text, or branding anywhere in the image. Do not invent or hallucinate logos or company names.'
+      : hasLogo
+        ? `Do not generate, recreate, imitate, redraw, stylize, or display ANY company logo, watermark, brand mark, brand initials, company text, or branding anywhere in the image. Do not invent or hallucinate logos or company names. Leave the ${requestedLogoPlacement} area clean, empty, and visually unobstructed so the exact uploaded logo can be added during edit mode.`
+        : null,
       
 
     // ── Content signals ───────────────────────────────────────────────────
