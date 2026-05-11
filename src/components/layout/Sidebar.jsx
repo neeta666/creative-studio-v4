@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Clock, Settings, Sparkles, LogOut, Building2 } from "lucide-react";
-import { platforms, getPersonaById } from "@/lib/personas";
+import { getPersonaById } from "@/lib/personas";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -85,33 +85,6 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
         })}
       </nav>
 
-      {/* Persona quick-switcher */}
-      {!collapsed && (
-        <div className="px-2 py-3 border-t border-border">
-          <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground px-2 pb-2 block">
-            Platforms
-          </span>
-          <div className="flex flex-col gap-0.5">
-            {platforms.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onPersonaChange(p.id)}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[12px] text-left transition-colors ${
-                  activePersona === p.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-secondary-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: p.color }}
-                />
-                <span className="truncate">{p.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
       {/* Sign Out */}
       <div className="px-2 py-3 border-t border-border">
         <TooltipProvider delayDuration={0}>
