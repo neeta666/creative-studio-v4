@@ -9,6 +9,7 @@ export default function MainLayout() {
     return localStorage.getItem("activePersona") || "uden_tech";
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = location.pathname || '/';
   const hideTopNav = pathname === '/refine';
 
@@ -39,7 +40,8 @@ export default function MainLayout() {
         <Sidebar
           activePersona={activePersona}
           onPersonaChange={handlePersonaChange}
-          collapsed={false}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
 
