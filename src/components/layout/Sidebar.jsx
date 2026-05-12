@@ -1,7 +1,15 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Clock, Settings, Sparkles, LogOut, Building2 } from "lucide-react";
-import { platforms, getPersonaById } from "@/lib/personas";
+import {
+  Clock,
+  Settings,
+  Sparkles,
+  LogOut,
+  Building2,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
+import { getPersonaById } from "@/lib/personas";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -12,7 +20,12 @@ const navItems = [
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
-export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
+export default function Sidebar({
+  activePersona,
+  onPersonaChange,
+  collapsed,
+  onToggleCollapse,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -30,7 +43,13 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
       }`}
     >
       {/* Persona badge */}
-      <div className="flex items-center gap-2.5 px-3 py-3 border-b border-border">
+      <div
+        className={`border-b border-border flex items-center ${
+          collapsed
+            ? "justify-between px-2 py-3"
+            : "gap-2.5 px-3 py-3"
+        }`}
+      >
         <div
           className="w-8 h-8 rounded-md flex items-center justify-center text-xs font-display font-bold shrink-0"
           style={{
@@ -50,6 +69,25 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
               Active Persona
             </p>
           </div>
+        )}
+        {!collapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors mr-2"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </button>
+        )}
+
+        {collapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="hidden lg:flex shrink-0 items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+          </button>
         )}
       </div>
 
@@ -77,7 +115,12 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
                   </Link>
                 </TooltipTrigger>
                 {collapsed && (
-                  <TooltipContent side="right">{item.label}</TooltipContent>
+                  <TooltipContent
+                    side="right"
+                    className="border border-primary/40 bg-card text-primary"
+                  >
+                    {item.label}
+                  </TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>
@@ -85,33 +128,6 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
         })}
       </nav>
 
-      {/* Persona quick-switcher */}
-      {!collapsed && (
-        <div className="px-2 py-3 border-t border-border">
-          <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground px-2 pb-2 block">
-            Platforms
-          </span>
-          <div className="flex flex-col gap-0.5">
-            {platforms.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onPersonaChange(p.id)}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[12px] text-left transition-colors ${
-                  activePersona === p.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-secondary-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: p.color }}
-                />
-                <span className="truncate">{p.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
       {/* Sign Out */}
       <div className="px-2 py-3 border-t border-border">
         <TooltipProvider delayDuration={0}>
@@ -125,7 +141,14 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
                 {!collapsed && <span>Sign Out</span>}
               </button>
             </TooltipTrigger>
-            {collapsed && <TooltipContent side="right">Sign Out</TooltipContent>}
+            {collapsed && (
+              <TooltipContent
+                side="right"
+                className="border border-primary/40 bg-card text-primary"
+              >
+                Sign Out
+              </TooltipContent>
+            )}
           </Tooltip>
         </TooltipProvider>
       </div>

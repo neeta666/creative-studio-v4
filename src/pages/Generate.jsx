@@ -191,6 +191,9 @@ export default function Generate() {
   const [exportVariant, setExportVariant] = useState(null);
   const [generationStage, setGenerationStage] = useState('idle');
   const videoPollingRef = useRef(new Set());
+  const [showPlatformSelect, setShowPlatformSelect] = useState(() => {
+    return !localStorage.getItem("activePersona");
+  });
 
   const openRefinePage = (content) => {
     if (!content || !lastGenerationParams) {
@@ -673,10 +676,25 @@ export default function Generate() {
 
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-5xl mx-auto">
-      <PersonaSelector
-        activePlatform={activePersona}
-        onSelect={setActivePersona}
-      />
+      {showPlatformSelect ? (
+        <PersonaSelector
+          activePlatform={activePersona}
+          onSelect={(platformId) => {
+            setActivePersona(platformId);
+            setShowPlatformSelect(false);
+          }}
+        />
+      ) : (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowPlatformSelect(true)}
+            className="rounded-full border border-primary/70 bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow-[0_12px_30px_-18px_rgba(249,115,22,0.9)] transition hover:bg-primary/90 hover:shadow-[0_16px_38px_-18px_rgba(249,115,22,1)]"
+          >
+            Switch Platform
+          </button>
+        </div>
+      )}
 
       <GenerationForm
         activePersona={activePersona}
