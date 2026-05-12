@@ -770,8 +770,20 @@ export default function Generate() {
               </div>
               <div className={`rounded-xl border px-3 py-3 ${generationStage === 'image' ? 'border-primary/50 bg-primary/5' : 'border-border/70 bg-background/60'}`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Step 2</p>
-                <p className="mt-1 text-sm font-medium text-foreground">Generate image</p>
-                <p className="mt-1 text-xs text-muted-foreground">Wait for the image provider to finish rendering.</p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {generationStage === 'video'
+                    ? 'Generate video'
+                    : generationStage === 'image'
+                    ? 'Generate image'
+                    : 'Prepare text'}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {generationStage === 'video'
+                    ? 'Wait for the video provider to finish processing.'
+                    : generationStage === 'image'
+                    ? 'Wait for the image provider to finish rendering.'
+                    : 'Generate platform-ready text content.'}
+                </p>
               </div>
               <div className={`rounded-xl border px-3 py-3 ${stageProgressValue >= 92 ? 'border-primary/50 bg-primary/5' : 'border-border/70 bg-background/60'}`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Step 3</p>
