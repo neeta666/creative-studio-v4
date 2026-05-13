@@ -85,6 +85,9 @@ const sanitizeCompanyPersona = (persona) => ({
   goals: persona.goals || '',
   notes: persona.notes || '',
   visual_style_instructions: persona.visual_style_instructions || '',
+  brand_primary_color: persona.brand_primary_color || '',
+  brand_secondary_color: persona.brand_secondary_color || '',
+  brand_accent_color: persona.brand_accent_color || '',
   tuning_prompt: persona.tuning_prompt || '',
   learning_summary: persona.learning_summary || '',
   learning_count: Number(persona.learning_count || 0),
@@ -1626,7 +1629,23 @@ app.post('/api/company-personas/logo', authRequired, async (req, res) => {
 
 app.post('/api/company-personas', authRequired, async (req, res) => {
   const userId = req.user.id || req.user._id.toString();
-  const { name, company, tagline, logo_url, logo_placement, preserve_original_logo, audience, voice, goals, notes, visual_style_instructions, tuning_prompt } = req.body || {};
+  const {
+    name,
+    company,
+    tagline,
+    logo_url,
+    logo_placement,
+    preserve_original_logo,
+    audience,
+    voice,
+    goals,
+    notes,
+    visual_style_instructions,
+    brand_primary_color,
+    brand_secondary_color,
+    brand_accent_color,
+    tuning_prompt,
+  } = req.body || {};
 
   if (!name || !company) {
     return res.status(400).json({ message: 'Persona name and company are required' });
@@ -1653,6 +1672,9 @@ app.post('/api/company-personas', authRequired, async (req, res) => {
     goals: String(goals || '').trim(),
     notes: String(notes || '').trim(),
     visual_style_instructions: String(visual_style_instructions || '').trim(),
+    brand_primary_color: String(brand_primary_color || '').trim(),
+    brand_secondary_color: String(brand_secondary_color || '').trim(),
+    brand_accent_color: String(brand_accent_color || '').trim(),
     tuning_prompt: String(tuning_prompt || '').trim(),
     learning_summary: '',
     learning_count: 0,
@@ -1684,6 +1706,9 @@ app.patch('/api/company-personas/:id', authRequired, async (req, res) => {
     goals: String(req.body.goals ?? existing.goals).trim(),
     notes: String(req.body.notes ?? existing.notes).trim(),
     visual_style_instructions: String(req.body.visual_style_instructions ?? existing.visual_style_instructions).trim(),
+    brand_primary_color: String(req.body.brand_primary_color ?? existing.brand_primary_color ?? '').trim(),
+    brand_secondary_color: String(req.body.brand_secondary_color ?? existing.brand_secondary_color ?? '').trim(),
+    brand_accent_color: String(req.body.brand_accent_color ?? existing.brand_accent_color ?? '').trim(),
     tuning_prompt: String(req.body.tuning_prompt ?? existing.tuning_prompt).trim(),
     learning_summary: String(req.body.learning_summary ?? existing.learning_summary).trim(),
     learning_count: Number(req.body.learning_count ?? existing.learning_count ?? 0),
