@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const USER_TOKEN_KEY = 'creative_studio_token';
 const SUPERADMIN_TOKEN_KEY = 'creative_studio_superadmin_token';
 
@@ -39,7 +39,7 @@ async function request(path, options = {}) {
       headers,
     });
   } catch (error) {
-    throw new Error('Backend API is not reachable. Start the Mongo server on http://localhost:4000 and try again.');
+    throw new Error('Backend API is not reachable. Check the API service or reverse proxy and try again.');
   }
 
   const data = await response.json().catch(() => ({}));
@@ -87,7 +87,7 @@ function xhrRequest(path, { method = 'GET', body, headers = {}, onUploadProgress
     };
 
     xhr.onerror = () => {
-      reject(new Error('Backend API is not reachable. Start the Mongo server on http://localhost:4000 and try again.'));
+      reject(new Error('Backend API is not reachable. Check the API service or reverse proxy and try again.'));
     };
 
     if (xhr.upload && typeof onUploadProgress === 'function') {

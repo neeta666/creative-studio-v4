@@ -3,7 +3,7 @@ import { Copy, Check, Maximize2, Download, Share2, Sparkles, Trash2 } from "luci
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
-const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api').replace(/\/api\/?$/, '');
+const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/api\/?$/, '');
 
 const resolveAssetUrl = (value) => {
   const source = String(value || '').trim();

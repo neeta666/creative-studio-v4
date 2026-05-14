@@ -54,6 +54,29 @@ app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
+const frontendDistDir = path.resolve(__dirname, '../dist');
+app.use(express.static(frontendDistDir, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      return;
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  },
+}));
+
+app.get(/^(?!\/api(?:\/|$)).*/, async (_req, res, next) => {
+  try {
+    const indexPath = path.join(frontendDistDir, 'index.html');
+    await fs.access(indexPath);
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.sendFile(indexPath);
+  } catch (error) {
+    next();
+  }
+});
+
 const createToken = (payload) => jwt.sign(payload, jwtSecret, { expiresIn: '7d' });
 const nowIso = () => new Date().toISOString();
 const normalizeEmail = (value) => String(value || '').trim().toLowerCase();

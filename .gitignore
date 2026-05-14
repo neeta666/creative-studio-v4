@@ -1,8 +1,12 @@
 #env
 .env
 .env.*
+.env.local
 
 server/uploads/
+coverage/
+*.pid
+*.pid.lock
 
 # Logs
 /logs
