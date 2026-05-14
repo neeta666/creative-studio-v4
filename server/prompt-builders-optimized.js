@@ -223,6 +223,11 @@ export const buildImagePrompt = ({
   const platformStyle =
     IMAGE_PLATFORM_STYLE[normalizedPlatform] ||
     'Social media image: strong focal point, clear hierarchy, platform-native composition, mobile-optimized.';
+  const brandPalette = [
+    persona.brand_primary_color ? `Primary ${persona.brand_primary_color}` : null,
+    persona.brand_secondary_color ? `Secondary ${persona.brand_secondary_color}` : null,
+    persona.brand_accent_color ? `Accent ${persona.brand_accent_color}` : null,
+  ].filter(Boolean).join(', ');
 
   return [
     // ── Task ──────────────────────────────────────────────────────────────
@@ -240,6 +245,9 @@ export const buildImagePrompt = ({
       : null,
     persona.voice ? `Tone: ${persona.voice}.` : null,
     persona.audience ? `Audience: ${persona.audience}.` : null,
+    brandPalette
+      ? `Brand color palette: ${brandPalette}. Use these colors consistently across backgrounds, accents, UI elements, supporting graphics, and typography-style overlays unless the user gives a direct color override.`
+      : null,
 
     // ── Visual direction ──────────────────────────────────────────────────
     // personaTuningPrompt sent ONCE (was sent twice under two different labels).
@@ -360,6 +368,12 @@ export const buildVideoPrompt = ({
     VIDEO_PLATFORM_STYLE[normalizedPlatform] ||
     'Social video: strong visual hook, clear structure (hook → development → payoff), platform-native pacing, mobile-optimized.';
 
+  const brandPalette = [
+    persona.brand_primary_color ? `Primary ${persona.brand_primary_color}` : null,
+    persona.brand_secondary_color ? `Secondary ${persona.brand_secondary_color}` : null,
+    persona.brand_accent_color ? `Accent ${persona.brand_accent_color}` : null,
+  ].filter(Boolean).join(', ');
+
   return [
     // ── Task ──────────────────────────────────────────────────────────────
     'Social media video prompt:',
@@ -373,6 +387,9 @@ export const buildVideoPrompt = ({
       : null,
     persona.voice ? `Tone: ${persona.voice}.` : null,
     persona.audience ? `Audience: ${persona.audience}.` : null,
+    brandPalette
+      ? `Brand color palette: ${brandPalette}. Use these colors consistently across lighting, backgrounds, accents, typography-style overlays, and scene styling unless the user gives a direct color override.`
+      : null,
     // Video keeps visual_style_instructions and tuning_prompt without stripping
     // because there's no color-override system for video (yet).
     persona.visual_style_instructions

@@ -52,6 +52,9 @@ const createEmptyDraft = (companyName) => ({
   goals: "",
   notes: "",
   visualStyleInstructions: "",
+  brandPrimaryColor: "#22C55E",
+  brandSecondaryColor: "#FFFFFF",
+  brandAccentColor: "#0F172A",
   tuningPrompt: "",
   logoPlacement: "none",
   preserveOriginalLogo: true,
@@ -110,6 +113,9 @@ export default function PersonaSelect() {
       goals: personaDraft.goals,
       notes: personaDraft.notes,
       visual_style_instructions: personaDraft.visualStyleInstructions,
+      brand_primary_color: personaDraft.brandPrimaryColor,
+      brand_secondary_color: personaDraft.brandSecondaryColor,
+      brand_accent_color: personaDraft.brandAccentColor,
       tuning_prompt: personaDraft.tuningPrompt,
       logo_placement: personaDraft.logoPlacement,
       preserve_original_logo: personaDraft.preserveOriginalLogo,
@@ -137,6 +143,9 @@ export default function PersonaSelect() {
       goals: personaDraft.goals,
       notes: personaDraft.notes,
       visual_style_instructions: personaDraft.visualStyleInstructions,
+      brand_primary_color: personaDraft.brandPrimaryColor,
+      brand_secondary_color: personaDraft.brandSecondaryColor,
+      brand_accent_color: personaDraft.brandAccentColor,
       tuning_prompt: personaDraft.tuningPrompt,
       logo_placement: personaDraft.logoPlacement,
       preserve_original_logo: personaDraft.preserveOriginalLogo,
@@ -179,6 +188,9 @@ export default function PersonaSelect() {
       goals: persona.goals || "",
       notes: persona.notes || "",
       visualStyleInstructions: persona.visual_style_instructions || "",
+      brandPrimaryColor: persona.brand_primary_color || "#22C55E",
+      brandSecondaryColor: persona.brand_secondary_color || "#FFFFFF",
+      brandAccentColor: persona.brand_accent_color || "#0F172A",
       tuningPrompt: persona.tuning_prompt || "",
       logoPlacement: persona.logo_placement || "none",
       preserveOriginalLogo: persona.preserve_original_logo !== false,
@@ -298,6 +310,20 @@ export default function PersonaSelect() {
                             <Badge variant="outline" className="text-[10px]">{persona.company}</Badge>
                           </div>
                           {persona.tagline && <p className="mt-1 text-xs text-muted-foreground">{persona.tagline}</p>}
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Palette:</span>
+                            
+                            {[persona.brand_primary_color, persona.brand_secondary_color, persona.brand_accent_color]
+                              .filter(Boolean)
+                              .map((color) => (
+                                <span
+                                  key={color}
+                                  title={color}
+                                  className="h-4 w-4 rounded-full border border-border"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                          </div>
                           {persona.visual_style_instructions && <p className="mt-2 text-xs text-muted-foreground line-clamp-2">Visuals: {persona.visual_style_instructions}</p>}
                           {persona.logo_placement && persona.logo_placement !== 'none' && <p className="mt-2 text-xs text-muted-foreground">Logo placement: {persona.logo_placement}</p>}
                           {persona.tuning_prompt && <p className="mt-2 text-xs text-muted-foreground line-clamp-2">Tuning: {persona.tuning_prompt}</p>}
@@ -424,6 +450,84 @@ export default function PersonaSelect() {
               </label>
             </div>
           </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Primary brand color
+              </label>
+              
+              <div className="flex items-center gap-2">
+                <Input
+                  type="color"
+                  value={personaDraft.brandPrimaryColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandPrimaryColor", event.target.value)
+                  }
+                  className="h-11 w-16 rounded-xl p-1"
+                />
+
+                <Input
+                  value={personaDraft.brandPrimaryColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandPrimaryColor", event.target.value)
+                  }
+                  className="h-11 rounded-2xl"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Secondary brand color
+              </label>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  type="color"
+                  value={personaDraft.brandSecondaryColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandSecondaryColor", event.target.value)
+                  }
+                    className="h-11 w-16 rounded-xl p-1"
+                />
+
+                <Input
+                  value={personaDraft.brandSecondaryColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandSecondaryColor", event.target.value)
+                  }
+                    className="h-11 rounded-2xl"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Accent color
+              </label>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  type="color"
+                  value={personaDraft.brandAccentColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandAccentColor", event.target.value)
+                  }
+                    className="h-11 w-16 rounded-xl p-1"
+                />
+
+                <Input
+                  value={personaDraft.brandAccentColor}
+                  onChange={(event) =>
+                    handleDraftChange("brandAccentColor", event.target.value)
+                  }
+                    className="h-11 rounded-2xl"
+                />
+              </div>
+            </div>
+          </div>
+
           <Textarea value={personaDraft.visualStyleInstructions} onChange={(event) => handleDraftChange("visualStyleInstructions", event.target.value)} placeholder="Visual style instructions: themes, palette, motifs, subject cues, composition preferences" className="min-h-28 rounded-2xl" />
           <Textarea value={personaDraft.tuningPrompt} onChange={(event) => handleDraftChange("tuningPrompt", event.target.value)} placeholder="Persistent tuning prompt: preferred hooks, banned phrases, CTA style, formatting rules, brand positioning" className="min-h-28 rounded-2xl" />
           <Textarea value={personaDraft.notes} onChange={(event) => handleDraftChange("notes", event.target.value)} placeholder="Extra brand notes for AI analysis" className="min-h-28 rounded-2xl" />
